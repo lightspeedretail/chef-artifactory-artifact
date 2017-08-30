@@ -12,28 +12,26 @@ property :mode, :kind_of => [Integer, String]
 property :owner, :kind_of => [Integer, String]
 
 action_class do
-  require "uri"
+  require 'uri'
 
   include ::ArtifactoryArtifact::Helper
 
   def manage_resource(new_resource)
     request_headers = artifactory_headers(
       :username => new_resource.artifactory_username,
-      :password => new_resource.artifactory_password,
+      :password => new_resource.artifactory_password
     )
 
     if new_resource.artifactory_url
       artifactory_url = ::URI.parse(new_resource.artifactory_url)
+    elsif new_resource.artifactoryonline
+      artifactory_url = ::URI.parse(artifactoryonline_url(new_resource.artifactoryonline))
     else
-      if new_resource.artifactoryonline
-        artifactory_url = ::URI.parse(artifactoryonline_url(new_resource.artifactoryonline))
-      else
-        fail("Artifactory URL is not specified")
-      end
+      raise('Artifactory URL is not specified')
     end
 
-    repository_path = "#{new_resource.repository.sub(/\A\/+/, "")}/#{new_resource.repository_path}"
-    artifact_url = ::URI.join("#{artifactory_url}/", repository_path.sub(/\A\/+/, ""))
+    repository_path = "#{new_resource.repository.sub(/\A\/+/, '')}/#{new_resource.repository_path}"
+    artifact_url = ::URI.join("#{artifactory_url}/", repository_path.sub(/\A\/+/, ''))
     storage_url = ::URI.join("#{artifactory_url}/", "api/storage/#{repository_path}")
 
     # Retrieve Artifact's SHA256 checksum via Artifactory REST API
@@ -41,8 +39,8 @@ action_class do
     artifact_sha256sum = nil
     begin
       data = artifactory_rest_get(storage_url, request_headers)
-      if data["checksums"] and data["checksums"]["sha256"]
-        sha256sum = data["checksums"]["sha256"]
+      if data['checksums'] && data['checksums']['sha256']
+        artifact_sha256sum = data['checksums']['sha256']
       end
     rescue => error
       ::Chef::Log.warn(error)
