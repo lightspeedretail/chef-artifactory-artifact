@@ -4,7 +4,7 @@ maintainer_email 'pg.omni.devops@lightspeedhq.com'
 license          'Apache 2.0'
 description      'Download artifacts from Artifactory'
 long_description 'Download artifacts from Artifactory'
-version          '0.7.0'
+version          '0.7.1'
 
 chef_version '>= 12'
 supports 'ubuntu'

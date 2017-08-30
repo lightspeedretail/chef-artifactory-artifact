@@ -5,7 +5,7 @@ require 'uri'
 module ArtifactoryArtifact
   module Helper
     def artifactoryonline_url(server_name)
-      File.join('https://', server_name + '.jfrog.io', server_name)
+      ::URI.join('https://', server_name + '.jfrog.io', server_name)
     end
 
     def artifactory_headers(options = {})
@@ -45,11 +45,7 @@ module ArtifactoryArtifact
     end
 
     def artifactory_rest(method, artifactory_url, body, headers = {})
-      uri = if ::URI == artifactory_url
-              artifactory_url
-            else
-              ::URI.parse(artifactory_url)
-            end
+      uri = artifactory_url.is_a?(::URI) ? artifactory_url : ::URI.parse(artifactory_url)
       request_class = ::Net::HTTP.const_get(method.to_s.capitalize)
       request_has_body = begin
                            request_class.const_get(:REQUEST_HAS_BODY)
